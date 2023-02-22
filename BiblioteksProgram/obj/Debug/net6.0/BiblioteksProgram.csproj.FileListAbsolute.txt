@@ -1,0 +1,15 @@
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\obj\Debug\net6.0\BiblioteksProgram.csproj.AssemblyReference.cache
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\obj\Debug\net6.0\BiblioteksProgram.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\obj\Debug\net6.0\BiblioteksProgram.AssemblyInfoInputs.cache
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\obj\Debug\net6.0\BiblioteksProgram.AssemblyInfo.cs
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\obj\Debug\net6.0\BiblioteksProgram.csproj.CoreCompileInputs.cache
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\bin\Debug\net6.0\BiblioteksProgram.exe
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\bin\Debug\net6.0\BiblioteksProgram.deps.json
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\bin\Debug\net6.0\BiblioteksProgram.runtimeconfig.json
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\bin\Debug\net6.0\BiblioteksProgram.dll
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\bin\Debug\net6.0\BiblioteksProgram.pdb
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\obj\Debug\net6.0\BiblioteksProgram.dll
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\obj\Debug\net6.0\refint\BiblioteksProgram.dll
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\obj\Debug\net6.0\BiblioteksProgram.pdb
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\obj\Debug\net6.0\BiblioteksProgram.genruntimeconfig.cache
+C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\obj\Debug\net6.0\ref\BiblioteksProgram.dll
