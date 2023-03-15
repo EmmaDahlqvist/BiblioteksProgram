@@ -1,3 +1,4 @@
-Emma|123|123
 Ida|123|020325
-anna dahlqvist|anna|730115
+emma|1234|1234
+Emma|123|123
+person|123|nummer
