@@ -1,3 +1,4 @@
-bok|emma|123
-bok|emma|123
-ETa|Effarf|1234124123
+2|bok|författare|4|True|False|D
+3|författare2|författare2|1|False|False|
+1|bamse|astrid|123-123|False|True|730115
+5|att om chips|estrella|111|False|False|

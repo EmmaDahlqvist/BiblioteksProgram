@@ -38,13 +38,13 @@ namespace BiblioteksProgram
         private static void MemberProfileStage(User user)
         {
             Console.Clear();
-            Console.WriteLine("Din Sida - " + user.name);
-            Console.WriteLine("1) Böcker \n2) Konto \n3) Logga ut");
+            Console.WriteLine("[Medlem] Din Sida - " + user.name);
+            Console.WriteLine("1) Böcker \n2) Byt lösenord \n3) Logga ut");
             int choice = Options(3);
             switch (choice)
             {
                 case 1:
-                    LibBookStage();
+                    MemBookStage(user);
                     MemberProfileStage(user);
                     break;
                 case 2:
@@ -58,49 +58,184 @@ namespace BiblioteksProgram
         }
 
         //Boksteg (Medlem)
-        private static void MemBookStage()
+        private static void MemBookStage(User user)
         {
             Console.Clear();
             Console.WriteLine("Bok sida");
-            Console.WriteLine("1) Låna bok \n2) Reservera bok\n3) Lämna tillbaka bok \n4) Sök efter bok");
-            int choice = Options(4);
+            Console.WriteLine("1) Låna bok \n2) Reservera bok\n3) Dina böcker\n4) Sök efter bok\n5) Se boklistan");
+            int choice = Options(5);
             switch (choice)
             {
                 case 1:
                     //låna bok
-                    BorrowBook();
+                    BorrowBook(user);
                     break;
                 case 2:
                     //reservera bok
-                    ReservBook();
+                    ReservBook(user);
                     break;
                 case 3:
-                    //returnera bok
+                    YourBooks(user);
                     break;
                 case 4:
                     //sök efter bok
-                    SearchBook();
+                    SearchBook(false);
+                    break;
+                case 5:
+                    //boklista
+                    BookList(false);
                     break;
 
             }
         }
 
-        private static void BorrowBook()
+        private static void YourBooks(User user)
         {
-            
+            while(true)
+            {
+                Console.Clear();
+                Console.WriteLine("Dina böcker: ");
+                List<Book> books = bookSystem.GetOwnedBooks(user.personal_number);
+                List<int> bookID = new List<int>();
+                if (books.Count == 0)
+                {
+                    Console.WriteLine("0...");
+                }
+                else
+                {
+                    foreach (Book book in books)
+                    {
+                        FormatBookInformation(book, true);
+                        bookID.Add(book.id);
+                    }
+                }
+
+                Console.WriteLine("\n1) Välj en bok \n2) Gå tillbaks");
+                int option = Options(2);
+                if (option == 1)
+                {
+                    Console.WriteLine("Välj bok ID");
+                    int ID;
+                    try
+                    {
+                        ID = int.Parse(Console.ReadLine());
+                    } catch(Exception ex)
+                    {
+                        Console.WriteLine("Vänligen välj en int!");
+                        Thread.Sleep(2000);
+                        continue;
+                    }
+                    if (bookID.Contains(ID))
+                    {
+                        Book book = bookSystem.GetBookFromID(ID);
+                        Console.WriteLine("\n1) Lämna tillbaks boken \n2) Gå tillbaks");
+                        int option2 = Options(2);
+                        if(option2 == 1)
+                        {
+                            Book newBook = new Book(book.id, book.title, book.author, book.ISBN, false, false, null);
+                            bookSystem.AddBook(newBook);
+                            bookSystem.RemoveBook(book);
+                            Console.WriteLine("Lämnade tillbaks boken!");
+                            Thread.Sleep(2000);
+                            continue;
+                        } else if(option2 == 2)
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Du äger inte en bok med detta ID!");
+                        Thread.Sleep(2000);
+                        continue;
+                    }
+
+                } else
+                {
+                    break;
+                }
+            }
         }
 
-        private static void ReservBook()
+        private static void BorrowBook(User user)
         {
+            BorrowOrReserv(user, true);
+        }
 
+        private static void ReservBook(User user)
+        {
+            BorrowOrReserv(user, false);
+        }
+
+        private static void BorrowOrReserv(User user, bool borrow)
+        {
+            bool keepGoing = true;
+            Console.Clear();
+            while (keepGoing)
+            {
+                Console.WriteLine("1) Se boklistan\n2) Sök bok \n3) Välj bok\n4) Gå tillbaka");
+                int option = Options(4);
+                if (option == 1)
+                {
+                    BookList(false);
+                    continue;
+                }
+                else if (option == 2)
+                {
+                    SearchBook(false);
+                    continue;
+                } else if(option == 4)
+                {
+                    break;
+                }
+
+                do
+                {
+                    Console.Write("\nVälj ID på boken du vill välja: ");
+                    int id = int.Parse(Console.ReadLine());
+                    if (!bookSystem.GetTakenIds().Contains(id))
+                    {
+                        Console.WriteLine("Detta ID finns inte, försök igen");
+                        continue;
+                    }
+                    else
+                    {
+                        Book tempBook = bookSystem.GetBookFromID(id);
+                        Book book = null;
+                        if(tempBook.isBorrowed || tempBook.isRented)
+                        {
+                            Console.WriteLine("Denna bok ägs redan av någon annan!");
+                            Thread.Sleep(2000);
+                            break;
+                        }
+                        {
+                            if (borrow) //låna
+                            {
+                                book = new Book(tempBook.id, tempBook.title, tempBook.author, tempBook.ISBN, true, false, user.personal_number);
+                            }
+                            else //reservera
+                            {
+                                book = new Book(tempBook.id, tempBook.title, tempBook.author, tempBook.ISBN, false, true, user.personal_number);
+                            }
+                            bookSystem.RemoveBook(tempBook);
+                            bookSystem.AddBook(book);
+                            Console.WriteLine("Lånade boken: " + tempBook.title + " av " + tempBook.author);
+                            keepGoing = false;
+                            break;
+                        }
+                    }
+
+                } while (true);
+
+            }
         }
 
         //Profil (Bibliotikarie)
         private static void LibrarianProfileStage(User user)
         {
             Console.Clear();
-            Console.WriteLine("Din Sida - " + user.name);
-            Console.WriteLine("1) Hantera böcker\n2) Hantera användare\n3) Hantera konto \n4) Logga ut");
+            Console.WriteLine("[Bibliotikarie] Din Sida - " + user.name);
+            Console.WriteLine("1) Hantera böcker\n2) Hantera användare\n3) Byt lösenord \n4) Logga ut");
             int choice = Options(4);
             switch (choice)
             {
@@ -165,9 +300,16 @@ namespace BiblioteksProgram
             {
                 Console.Clear();
                 User tempMember = ChooseMember();
+
+                if(tempMember == null)
+                {
+                    break;
+                }
+
                 User member = userSystem.GetMember(tempMember.name, tempMember.password, tempMember.personal_number);
                 if (member != null) //användaren finns i systemet
                 {
+                    Console.Clear();
                     Console.WriteLine("Du valde användaren: ");
                     FormatUserInformation(member.name, member.password, member.personal_number);
                     Console.WriteLine("\n1) Ändra namn \n2) Ändra lösenord\n3) Ändra personnummer");
@@ -220,13 +362,17 @@ namespace BiblioteksProgram
 
         private static void RemoveMember()
         {
-            User memberToRemove;
+            User memberToRemove = null;
             do
             {
                 Console.Clear();
                 User tempMember = ChooseMember();
-                memberToRemove = userSystem.GetMember(tempMember.name, tempMember.password, tempMember.personal_number);
+                if(tempMember == null)
+                {
+                    break;
+                }
 
+                memberToRemove = userSystem.GetMember(tempMember.name, tempMember.password, tempMember.personal_number);
                 if(memberToRemove != null)
                 {
                     break;
@@ -256,6 +402,10 @@ namespace BiblioteksProgram
             {
                 memberExists = false; //resetta
                 member = ChooseMember();
+                if(member == null)
+                {
+                    break;
+                }
 
                 foreach (User exsistingMember in userSystem.GetMembers())
                 {
@@ -267,8 +417,11 @@ namespace BiblioteksProgram
                 }
 
             } while (memberExists);
-            Console.WriteLine("Lade till " + member.name + " i systemet!");
-            userSystem.AddMember(member);
+            if(member != null)
+            {
+                Console.WriteLine("Lade till " + member.name + " i systemet!");
+                userSystem.AddMember(member);
+            }
             Thread.Sleep(2000);
         }
 
@@ -282,7 +435,7 @@ namespace BiblioteksProgram
                 Console.WriteLine("Personnummer: " + user.personal_number);
                 Console.WriteLine("Lösenord: " + user.password);
             }
-            Console.WriteLine("\nKlicka på valfri kanpp för att gå vidare ->");
+            Console.WriteLine("\nKlicka på valfri knapp för att gå vidare ->");
             Console.ReadKey();
         }
 
@@ -328,47 +481,67 @@ namespace BiblioteksProgram
                     RemoveBook();
                     break;
                 case 3:
-                    BookList();
+                    BookList(true);
                     break;
                 case 4:
-                    SearchBook();
+                    SearchBook(true);
                     break;
             }
         }
 
         private static void RemoveBook()
         {
-            do
+            bool keepGoing = true;
+            while (keepGoing)
             {
                 Console.Clear();
-                Console.WriteLine("Vilken bok vill du ta bort?");
-                Console.Write("Titel: ");
-                string title = Console.ReadLine();
-                Console.Write("Författare: ");
-                string author = Console.ReadLine();
-                Console.Write("ISBN: ");
-                string isbn = Console.ReadLine();
-                Book book = new Book(title, author, isbn);
-                Book bookToRemove = bookSystem.GetBook(book);
-                if (bookToRemove != null)
+                Console.WriteLine("1) Se boklistan\n2) Ta bort bok");
+                int option = Options(2);
+                if (option == 1)
                 {
-                    Console.WriteLine("Tog bort boken " + book.title + " av " + book.author);
-                    bookSystem.RemoveBook(bookToRemove);
-                    Thread.Sleep(2000);
-                    break;
-                } else
+                    BookList(true);
+                }
+
+                do
                 {
-                    Console.WriteLine("Boken fanns inte! \n1) Avbryt\n2) Försök igen");
-                    int option = Options(2);
-                    if (option == 1)
+                    Console.WriteLine("\nVilken bok vill du ta bort?");
+                    Console.Write("ID: ");
+                    int id = int.Parse(Console.ReadLine());
+
+                    Book bookToRemove = bookSystem.GetBookFromID(id);
+                    if (bookToRemove != null)
                     {
+                        if (bookToRemove.isRented || bookToRemove.isBorrowed)
+                        {
+                            Console.WriteLine("Boken är utlånad och kan ej tas bort");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Tog bort boken " + bookToRemove.title + " av " + bookToRemove.author);
+                            bookSystem.RemoveBook(bookToRemove);
+                            Thread.Sleep(2000);
+                            keepGoing = false;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Boken fanns inte!");
+                    }
+                    Console.WriteLine("\n1) Avbryt\n2) Försök igen");
+                    int option2 = Options(2);
+                    if (option2 == 1)
+                    {
+                        keepGoing = false;
                         break;
                     }
-                }
-            } while (true);
+                    break;
+
+                } while (true);
+            }
         }
 
-        private static void SearchBook()
+        private static void SearchBook(bool showOwner)
         {
             do
             {
@@ -379,9 +552,7 @@ namespace BiblioteksProgram
                 Console.WriteLine("Resultat...");
                 foreach (Book book in results)
                 {
-                    Console.WriteLine("\nTitel: " + book.title);
-                    Console.WriteLine("Författare: " + book.author);
-                    Console.WriteLine("ISBN: " + book.ISBN);
+                    FormatBookInformation(book, showOwner);
                 }
 
                 Console.WriteLine("\n1) Sök igen \n2) Gå vidare");
@@ -394,24 +565,9 @@ namespace BiblioteksProgram
             } while (true);
         }
 
-        private static void BookList()
-        {
-            Console.Clear();
-            Console.WriteLine("Tillgängliga böcker:");
-            foreach (Book book in bookSystem.GetBooks())
-            {
-                Console.WriteLine("\nTitel: " + book.title);
-                Console.WriteLine("Författare: " + book.author);
-                Console.WriteLine("ISBN: " + book.ISBN);
-            }
-
-            Console.WriteLine("\nKlicka på valfri kanpp för att gå vidare ->");
-            Console.ReadKey();
-        }
-
         private static void AddBook()
         {
-            Book book;
+            Book book = null;
             int wrongISBN = 0; //0 är neutralt, 1 är fel, 2 är rätt
 
             Console.Clear();
@@ -419,6 +575,22 @@ namespace BiblioteksProgram
             {
                 wrongISBN = 0; //återställ
 
+                Console.Write("Id: ");
+                int id = 0;
+                try
+                {
+                    id = int.Parse(Console.ReadLine());
+                } catch(Exception ex)
+                {
+                    Console.WriteLine("Vänligen välj ett nummer!");
+                    Thread.Sleep(2000);
+                    continue;
+                }
+                if (bookSystem.GetTakenIds().Contains(id))
+                {
+                    Console.WriteLine("IDt tillhör en annan bok, vänligen välj ett annat");
+                    continue;
+                }
                 Console.Write("Titel: ");
                 string title = Console.ReadLine();
                 Console.Write("Författare: ");
@@ -426,7 +598,7 @@ namespace BiblioteksProgram
                 Console.Write("ISBN: ");
                 string ISBN = Console.ReadLine();
 
-                book = new Book(title, author, ISBN);
+                book = new Book(id, title, author, ISBN, false, false, null);
                 List<Book> a_books = bookSystem.GetBooks();
 
                 List<string> takenISBN = new List<string>();
@@ -463,9 +635,11 @@ namespace BiblioteksProgram
 
             } while (wrongISBN != 2);
 
-            bookSystem.AddBook(book);
+            if(book != null)
+            {
+                bookSystem.AddBook(book);
+            }
         }
-
 
         private static void MakeLibrarian()
         {
@@ -474,6 +648,12 @@ namespace BiblioteksProgram
                 Console.Clear();
                 Console.WriteLine("Välj användare att ge bibliotikarie behörigheter: ");
                 User tempMember = ChooseMember();
+
+                if(tempMember == null)
+                {
+                    break;
+                }
+
                 User member = userSystem.GetMember(tempMember.name, tempMember.password, tempMember.personal_number);
                 if (member != null) //användaren finns i systemet
                 {
@@ -497,7 +677,7 @@ namespace BiblioteksProgram
             } while (true);
         }
 
-        //Konto (Bibliotikare och Medlem)
+        //(Bibliotikare och Medlem)
         private static void ChangePassword(User user, string memberOrLibrarian)
         {
             Console.Clear();
@@ -516,6 +696,19 @@ namespace BiblioteksProgram
             }
             Console.WriteLine("Uppdaterat!");
             Thread.Sleep(2000);
+        }
+
+        private static void BookList(bool showOwner)
+        {
+            Console.Clear();
+            Console.WriteLine("Tillgängliga böcker:");
+            foreach (Book book in bookSystem.GetBooks())
+            {
+                FormatBookInformation(book, showOwner);
+            }
+
+            Console.WriteLine("\nKlicka på valfri knapp för att gå vidare ->");
+            Console.ReadKey();
         }
 
         //Logga in
@@ -623,14 +816,37 @@ namespace BiblioteksProgram
 
         private static User ChooseMember()
         {
-            Console.Write("Namn: ");
-            string name = Console.ReadLine();
-            Console.Write("Lösenord: ");
-            string password = Console.ReadLine();
-            Console.Write("Personnummer: ");
-            string personal_number = Console.ReadLine();
-            User member = new User(name, password, personal_number);
+            User member = null;
+            while (true)
+            {
+                Console.WriteLine("1) Se användarlistan \n2) Sök användare\n3) Välj användare \n4) Avbryt");
+                int option = Options(4);
+                if (option == 1)
+                {
+                    MemberList();
+                    continue;
+                }
+                else if (option == 2)
+                {
+                    SearchMember();
+                    continue;
+                }
+                else if(option == 3)
+                {
+                    Console.Write("\nNamn: ");
+                    string name = Console.ReadLine();
+                    Console.Write("Personnummer: ");
+                    string personal_number = Console.ReadLine();
+                    Console.Write("Lösenord: ");
+                    string password = Console.ReadLine();
+                    member = new User(name, password, personal_number);
+                    break;
+                } else
+                {
+                    break;
+                }
 
+            }
             return member;
         }
 
@@ -639,6 +855,27 @@ namespace BiblioteksProgram
             Console.WriteLine("\nNamn: " + name);
             Console.WriteLine("Personnummer: " + personal_number);
             Console.WriteLine("Lösenord: " + password);
+        }
+
+        private static void FormatBookInformation(Book book, bool showOwner)
+        {
+            string status = "Tillgänglig";
+            Console.WriteLine("\nID: " + book.id);
+            Console.WriteLine("Titel: " + book.title);
+            Console.WriteLine("Författare: " + book.author);
+            Console.WriteLine("ISBN: " + book.ISBN);
+            if(book.isBorrowed == true)
+            {
+                status = "Utlånad";
+            } else if(book.isRented == true)
+            {
+                status = "Reserverad";
+            }
+            Console.WriteLine("Status: " + status);
+            if (showOwner)
+            {
+                Console.WriteLine("Ägare: " + book.owner);
+            }
         }
     }
 }

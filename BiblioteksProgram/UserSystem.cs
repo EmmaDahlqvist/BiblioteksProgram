@@ -51,6 +51,8 @@ namespace BiblioteksProgram
             librarians.Remove(librarian);
             Save();
         }
+
+
         private void Save()
         {
             string[] membersStringArray = members.Select(member => $"{member.name}|{member.password}|{member.personal_number}").ToArray();
