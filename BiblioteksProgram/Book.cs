@@ -12,16 +12,18 @@ namespace BiblioteksProgram
         public string title;
         public string author;
         public string ISBN;
+        public string genre;
         public bool isBorrowed { get; set; }
         public bool isRented { get; set; }
         public string owner { get; set; }
 
-        public Book(int id,  string title, string author, string ISBN, bool isBorrowed, bool isRented, string owner)
+        public Book(int id,  string title, string author, string ISBN, string genre, bool isBorrowed, bool isRented, string owner)
         {
             this.id = id;
             this.title = title;
             this.author = author;
             this.ISBN = ISBN;
+            this.genre = genre;
             this.isBorrowed = isBorrowed;
             this.isRented = isRented;
             this.owner = owner;

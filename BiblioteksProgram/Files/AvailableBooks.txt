@@ -1,4 +1,5 @@
-2|bok|författare|4|True|False|D
-3|författare2|författare2|1|False|False|
-1|bamse|astrid|123-123|False|True|730115
-5|att om chips|estrella|111|True|False|123
+2|bok|författare|4|kärlek|True|False|D
+1|bamse|astrid|123-123|skräck|False|True|730115
+0|Bok|Författare|3|Spänning|True|False|123
+4|Harry Potter|JK Rowling|0123|Spänning|False|True|000
+10|Snövit|Disney|isbn|Fantasy|False|False|

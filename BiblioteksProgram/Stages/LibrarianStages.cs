@@ -6,18 +6,17 @@ using System.Threading.Tasks;
 
 namespace BiblioteksProgram.Stages
 {
-    internal class LibrarianStages
+    internal class LibrarianStages : SharedStages
     {
 
         BookSystem bookSystem = BookSystem.GetInstance();
-        SharedStages sharedStages = new SharedStages();
         UserSystem userSystem = UserSystem.GetInstance();
         public void LibrarianProfileStage(User user)
         {
             Console.Clear();
             Console.WriteLine("[Bibliotikarie] Din Sida - " + user.name);
             Console.WriteLine("1) Hantera böcker\n2) Hantera användare\n3) Byt lösenord \n4) Logga ut");
-            int choice = sharedStages.Options(4);
+            int choice = Options(4);
             switch (choice)
             {
                 case 1:
@@ -30,7 +29,7 @@ namespace BiblioteksProgram.Stages
                     break;
                 case 3:
                     //konto stage
-                    sharedStages.ChangePassword(user, "librarian");
+                    ChangePassword(user, "librarian");
                     LibrarianProfileStage(user);
                     break;
                 case 4:
@@ -45,7 +44,7 @@ namespace BiblioteksProgram.Stages
             Console.WriteLine("Hantera användare");
             Console.WriteLine("1) Se användarlista\n2) Lägg till användare\n3) Ta bort användare \n4) Redigera användare \n5) Sök användare " +
                 "\n6) Gör användare till bibliotikarie \n7) Gå tillbaka");
-            int choice = sharedStages.Options(7);
+            int choice = Options(7);
             switch (choice)
             {
                 case 1:
@@ -94,12 +93,13 @@ namespace BiblioteksProgram.Stages
                 {
                     Console.Clear();
                     Console.WriteLine("Du valde användaren: ");
-                    sharedStages.FormatUserInformation(member.name, member.password, member.personal_number);
+                    FormatUserInformation(member);
+
                     Console.WriteLine("\n1) Ändra namn \n2) Ändra lösenord\n3) Ändra personnummer");
                     string name = member.name;
                     string password = member.password;
                     string personal_number = member.personal_number;
-                    int option = sharedStages.Options(3);
+                    int option = Options(3);
                     switch (option)
                     {
                         case 1:
@@ -120,6 +120,7 @@ namespace BiblioteksProgram.Stages
                             else
                             {
                                 Console.WriteLine("Kunde inte byta personnummer.");
+                                Thread.Sleep(2000);
                             }
                             break;
                     }
@@ -128,15 +129,14 @@ namespace BiblioteksProgram.Stages
                     userSystem.AddMember(newUser);
                     userSystem.RemoveMember(member);
                     Console.WriteLine("\nInformation:");
-                    sharedStages.FormatUserInformation(name, password, personal_number);
+                    FormatUserInformation(newUser);
                     Thread.Sleep(2000);
                     break;
                 }
                 else //användaren finns inte med i systemet
                 {
-                    Console.WriteLine("Användaren existerar inte!\n1) Avbryt\n2) Försök igen");
-                    int option2 = sharedStages.Options(2);
-                    if (option2 == 1)
+                    Console.WriteLine("Användaren existerar inte!");
+                    if (!KeepGoing())
                     {
                         break;
                     }
@@ -161,9 +161,8 @@ namespace BiblioteksProgram.Stages
                 {
                     break;
                 }
-                Console.WriteLine("Denna medlem finns ej! Vill du\n1) Avbryta\n2) Försök igen");
-                int option = sharedStages.Options(2);
-                if (option == 1)
+                Console.WriteLine("Denna medlem finns ej!");
+                if (!KeepGoing())
                 {
                     break;
                 }
@@ -171,9 +170,9 @@ namespace BiblioteksProgram.Stages
             if (memberToRemove != null)
             {
                 Console.WriteLine("Tog bort " + memberToRemove.name);
+                Thread.Sleep(2000);
                 userSystem.RemoveMember(memberToRemove);
             }
-            Thread.Sleep(2000);
 
         }
 
@@ -204,9 +203,9 @@ namespace BiblioteksProgram.Stages
             if (member != null)
             {
                 Console.WriteLine("Lade till " + member.name + " i systemet!");
+                Thread.Sleep(2000);
                 userSystem.AddMember(member);
             }
-            Thread.Sleep(2000);
         }
 
         private void MemberList()
@@ -215,9 +214,7 @@ namespace BiblioteksProgram.Stages
             Console.WriteLine("Medlemmar i systemet:");
             foreach (User user in userSystem.GetMembers())
             {
-                Console.WriteLine("\nNamn: " + user.name);
-                Console.WriteLine("Personnummer: " + user.personal_number);
-                Console.WriteLine("Lösenord: " + user.password);
+                FormatUserInformation(user);
             }
             Console.WriteLine("\nKlicka på valfri knapp för att gå vidare ->");
             Console.ReadKey();
@@ -234,18 +231,49 @@ namespace BiblioteksProgram.Stages
                 Console.WriteLine("Resultat...");
                 foreach (User user in results)
                 {
-                    Console.WriteLine("\nNamn: " + user.name);
-                    Console.WriteLine("Personnummer: " + user.personal_number);
-                    Console.WriteLine("Lösenord: " + user.password);
+                    FormatUserInformation(user);
                 }
 
-                Console.WriteLine("\n1) Sök igen \n2) Gå vidare");
-                int choice = sharedStages.Options(2);
-                if (choice == 2)
+                if (!KeepGoing())
                 {
                     break;
                 }
 
+            } while (true);
+        }
+
+        private void MakeLibrarian()
+        {
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("Välj användare att ge bibliotikarie behörigheter: ");
+                User tempMember = ChooseMember();
+
+                if (tempMember == null)
+                {
+                    break;
+                }
+
+                User member = userSystem.GetMember(tempMember.name, tempMember.password, tempMember.personal_number);
+                if (member != null) //användaren finns i systemet
+                {
+                    Console.WriteLine("Du valde användaren: ");
+                    FormatUserInformation(member);
+                    userSystem.RemoveMember(member);
+                    userSystem.AddLibrarian(member);
+                    Console.WriteLine("\nKlart! Går vidare...");
+                    Thread.Sleep(2000);
+                    break;
+                }
+                else //användaren finns inte med i systemet
+                {
+                    Console.WriteLine("Användaren existerar inte!");
+                    if (!KeepGoing())
+                    {
+                        break;
+                    }
+                }
             } while (true);
         }
 
@@ -254,8 +282,8 @@ namespace BiblioteksProgram.Stages
         {
             Console.Clear();
             Console.WriteLine("Hantera böcker");
-            Console.WriteLine("1) Lägg till bok\n2) Ta bort bok\n3) Se boklista\n4) Sök efter bok\n5) Gå tillbaka");
-            int choice = sharedStages.Options(5);
+            Console.WriteLine("1) Lägg till bok\n2) Ta bort bok\n3) Redigera bok \n4) Se boklista\n5) Sök efter bok\n6) Gå tillbaka");
+            int choice = Options(6);
             switch (choice)
             {
                 case 1:
@@ -265,12 +293,15 @@ namespace BiblioteksProgram.Stages
                     RemoveBook();
                     break;
                 case 3:
-                    sharedStages.BookList(true);
+                    EditBook();
                     break;
                 case 4:
-                    SearchBook(true);
+                    BookList(true);
                     break;
                 case 5:
+                    SearchBook(true);
+                    break;
+                case 6:
                     break;
             }
         }
@@ -280,27 +311,16 @@ namespace BiblioteksProgram.Stages
             bool keepGoing = true;
             while (keepGoing)
             {
-                Console.Clear();
-                if(BookStageOptions() == false)
+                //Console.Clear();
+                if(BookStageOptions(true) == false)
                 {
                     break;
                 }
 
                 do
                 {
-                    int id;
                     Console.WriteLine("\nVilken bok vill du ta bort?");
-                    Console.Write("ID: ");
-                    try
-                    {
-                        id = int.Parse(Console.ReadLine());
-                        break;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Vänligen välj ett korrekt siffer id!");
-                        continue;
-                    }
+                    int id = ChooseID();
 
                     Book bookToRemove = bookSystem.GetBookFromID(id);
                     if (bookToRemove != null)
@@ -322,9 +342,8 @@ namespace BiblioteksProgram.Stages
                     {
                         Console.WriteLine("Boken fanns inte!");
                     }
-                    Console.WriteLine("\n1) Avbryt\n2) Försök igen");
-                    int option2 = sharedStages.Options(2);
-                    if (option2 == 1)
+
+                    if (!KeepGoing())
                     {
                         keepGoing = false;
                         break;
@@ -340,18 +359,16 @@ namespace BiblioteksProgram.Stages
             do
             {
                 Console.Clear();
-                Console.Write("Sök på bok efter [titel], [författare], eller [ISBN]: ");
+                Console.Write("Sök på bok efter [titel], [författare], [ISBN], eller [genre]: ");
                 string search = Console.ReadLine();
                 List<Book> results = bookSystem.FindBooks(search);
                 Console.WriteLine("Resultat...");
                 foreach (Book book in results)
                 {
-                    sharedStages.FormatBookInformation(book, showOwner);
+                    FormatBookInformation(book, showOwner);
                 }
 
-                Console.WriteLine("\n1) Sök igen \n2) Gå vidare");
-                int choice = sharedStages.Options(2);
-                if (choice == 2)
+                if (!KeepGoing())
                 {
                     break;
                 }
@@ -362,121 +379,111 @@ namespace BiblioteksProgram.Stages
         private void AddBook()
         {
             Book book = null;
-            int wrongISBN = 0; //0 är neutralt, 1 är fel, 2 är rätt
 
-            Console.Clear();
             do
             {
-                if (BookStageOptions() == false)
+                Console.Clear();
+                if (BookStageOptions(true) == false)
                 {
                     break;
                 }
 
-                wrongISBN = 0; //återställ
+                int id = ChooseID();
 
-                Console.Write("Id: ");
-                int id = 0;
-                try
-                {
-                    id = int.Parse(Console.ReadLine());
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Vänligen välj ett nummer!");
-                    Thread.Sleep(2000);
-                    continue;
-                }
                 if (bookSystem.GetTakenIds().Contains(id))
                 {
                     Console.WriteLine("IDt tillhör en annan bok, vänligen välj ett annat");
+                    Thread.Sleep(1000);
                     continue;
                 }
+
                 Console.Write("Titel: ");
                 string title = Console.ReadLine();
                 Console.Write("Författare: ");
                 string author = Console.ReadLine();
                 Console.Write("ISBN: ");
                 string ISBN = Console.ReadLine();
+                Console.Write("Genre: ");
+                string genre = Console.ReadLine();
 
-                book = new Book(id, title, author, ISBN, false, false, null);
-                List<Book> a_books = bookSystem.GetBooks();
+                book = new Book(id, title, author, ISBN, genre, false, false, null);
 
-                List<string> takenISBN = new List<string>();
-
-                foreach (Book a_book in a_books)
+                if (WrongISBN(book))
                 {
-                    takenISBN.Add(a_book.ISBN);
-                    if (a_book.title == title && a_book.author == author)
-                    {
-                        if (a_book.ISBN != ISBN)
-                        {
-                            Console.WriteLine($"ISBN för denna bok är {a_book.ISBN}, vänligen försök igen!\n");
-                            wrongISBN = 1; //fel
-                            break;
-                        }
-                        else
-                        {
-                            wrongISBN = 2; //rätt
-                        }
-                    }
-                }
-                if (wrongISBN == 0)
+                    Console.WriteLine("Försök igen...");
+                    Thread.Sleep(2000);
+                    continue;
+                } else
                 {
-                    //ISBN finns men tillgör en annan titel
-                    if (takenISBN.Contains(ISBN))
-                    {
-                        Console.WriteLine("Detta ISBN tillhör en annan bok!");
-                        wrongISBN = 1; //fel
-                    }
-                    else
-                    {
-                        wrongISBN = 2; //rätt
-                    }
+                    break;
                 }
 
-            } while (wrongISBN != 2);
+            } while (true);
 
             if (book != null)
             {
+                Console.WriteLine("Lägger till boken " + book.title + " av " + book.author);
                 bookSystem.AddBook(book);
+                Thread.Sleep(2000);
             }
         }
 
-        private void MakeLibrarian()
+        private void EditBook()
         {
             do
             {
                 Console.Clear();
-                Console.WriteLine("Välj användare att ge bibliotikarie behörigheter: ");
-                User tempMember = ChooseMember();
 
-                if (tempMember == null)
+                if (!BookStageOptions(true))
                 {
                     break;
                 }
 
-                User member = userSystem.GetMember(tempMember.name, tempMember.password, tempMember.personal_number);
-                if (member != null) //användaren finns i systemet
+                Console.WriteLine("Välj bok från ID: ");
+                int id = ChooseID();
+
+                Book book = bookSystem.GetBookFromID(id);
+                if(book.isRented || book.isBorrowed)
                 {
-                    Console.WriteLine("Du valde användaren: ");
-                    sharedStages.FormatUserInformation(member.name, member.password, member.personal_number);
-                    userSystem.RemoveMember(member);
-                    userSystem.AddLibrarian(member);
-                    Console.WriteLine("\nKlart! Går vidare...");
+                    Console.WriteLine("Du kan inte redigera en bok som ägs av någon!");
                     Thread.Sleep(2000);
+                    continue;
+                }
+
+                Console.WriteLine("Skriv in det du vill ändra:");
+                Console.Write("Titel: ");
+                string new_title = Console.ReadLine();
+                Console.Write("Författare: ");
+                string new_author = Console.ReadLine();
+                Console.Write("ISBN: ");
+                string new_ISBN = Console.ReadLine();
+                Console.Write("Genre: ");
+                string new_genre = Console.ReadLine();
+
+                Book newBook = new Book(id, new_title, new_author, new_ISBN, new_genre, false, false, null);
+                if (WrongISBN(newBook))
+                {
+                    Console.WriteLine("Försöker igen...");
+                    Thread.Sleep(2000);
+                    continue;
+                } else
+                {
+                    bookSystem.RemoveBook(book);
+                    bookSystem.AddBook(newBook);
+
+                    Console.Clear();
+                    Console.WriteLine("Gammal bok: ");
+                    FormatBookInformation(book, true);
+
+                    Console.WriteLine("\nRedigerad bok");
+                    FormatBookInformation(newBook, true);
+                    Console.ReadKey();
                     break;
                 }
-                else //användaren finns inte med i systemet
-                {
-                    Console.WriteLine("Användaren existerar inte!\n1) Avbryt\n2) Försök igen");
-                    int option2 = sharedStages.Options(2);
-                    if (option2 == 1)
-                    {
-                        break;
-                    }
-                }
+
             } while (true);
         }
+
 
         //Välj användare
         private User ChooseMember()
@@ -485,7 +492,7 @@ namespace BiblioteksProgram.Stages
             while (true)
             {
                 Console.WriteLine("1) Se användarlistan \n2) Sök användare\n3) Välj användare \n4) Avbryt");
-                int option = sharedStages.Options(4);
+                int option = Options(4);
                 if (option == 1)
                 {
                     MemberList();
@@ -516,28 +523,46 @@ namespace BiblioteksProgram.Stages
             return member;
         }
 
-        private bool BookStageOptions()
+
+        //Korrekt ISBN check
+        private bool WrongISBN(Book book)
         {
-            while (true)
+         
+
+            Console.WriteLine("Kollar isbn1");
+            //kolla om ISBN stämmer med boken
+            string correctISBN = bookSystem.WrongISBN(book);
+
+            if (correctISBN != null)
             {
-                Console.WriteLine("1) Se boklistan\n2) Sök bok \n3) Välj bok \n4) Gå tillbaka");
-                int option = sharedStages.Options(4);
-                if (option == 1)
-                {
-                    sharedStages.BookList(true);
-                }
-                else if (option == 2)
-                {
-                    sharedStages.SearchBook(true);
-                }
-                else if (option == 3)
-                {
-                    return true;
-                }
-                else if (option == 4)
-                {
-                    return false;
-                }
+                Console.WriteLine("ISBN för denna boken är " + correctISBN + "!");
+                return true; //ISBN är fel
+            }
+             
+            if (bookSystem.ISBNIsTaken(book))
+            {
+                //kolla om isbn är upptaget
+                Console.WriteLine("Detta ISBN tillhör en annan bok!");
+                Thread.Sleep(2000);
+                return true; //ISBN är taget
+            }
+
+            return false; //ISBN är rätt
+
+        }
+
+        //fortsätt / starta om
+        public bool KeepGoing()
+        {
+            Console.WriteLine("\n1) Avbryt\n2) Försök igen");
+            int option2 = Options(2);
+            if (option2 == 1)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
 

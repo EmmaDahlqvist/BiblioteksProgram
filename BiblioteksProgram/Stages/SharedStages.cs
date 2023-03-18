@@ -71,7 +71,7 @@ namespace BiblioteksProgram.Stages
             } while (true);
         }
 
-        //Övrigt
+        //Övriga funktioner
 
         public int Options(int amount)
         {
@@ -103,11 +103,11 @@ namespace BiblioteksProgram.Stages
             return input;
         }
 
-        public void FormatUserInformation(string name, string password, string personal_number)
+        public void FormatUserInformation(User user)
         {
-            Console.WriteLine("\nNamn: " + name);
-            Console.WriteLine("Personnummer: " + personal_number);
-            Console.WriteLine("Lösenord: " + password);
+            Console.WriteLine("\nNamn: " + user.name);
+            Console.WriteLine("Personnummer: " + user.personal_number);
+            Console.WriteLine("Lösenord: " + user.password);
         }
 
         public void FormatBookInformation(Book book, bool showOwner)
@@ -117,6 +117,7 @@ namespace BiblioteksProgram.Stages
             Console.WriteLine("Titel: " + book.title);
             Console.WriteLine("Författare: " + book.author);
             Console.WriteLine("ISBN: " + book.ISBN);
+            Console.WriteLine("Genre: " + book.genre);
             if (book.isBorrowed == true)
             {
                 status = "Utlånad";
@@ -129,6 +130,54 @@ namespace BiblioteksProgram.Stages
             if (showOwner)
             {
                 Console.WriteLine("Ägare: " + book.owner);
+            }
+        }
+
+        //Välj id (int)
+        public int ChooseID()
+        {
+            int id;
+            while (true)
+            {
+                Console.Write("Id: ");
+                id = 0;
+                try
+                {
+                    id = int.Parse(Console.ReadLine());
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Vänligen välj ett nummer!");
+                }
+            }
+
+            return id;
+        }
+
+        //Välj bok
+        public bool BookStageOptions(bool showOwner)
+        {
+            while (true)
+            {
+                Console.WriteLine("1) Se boklistan\n2) Sök bok \n3) Välj bok \n4) Gå tillbaka");
+                int option = Options(4);
+                if (option == 1)
+                {
+                    BookList(showOwner);
+                }
+                else if (option == 2)
+                {
+                    SearchBook(showOwner);
+                }
+                else if (option == 3)
+                {
+                    return true;
+                }
+                else if (option == 4)
+                {
+                    return false;
+                }
             }
         }
     }

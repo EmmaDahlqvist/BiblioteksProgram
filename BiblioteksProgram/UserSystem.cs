@@ -14,7 +14,6 @@ namespace BiblioteksProgram
 
         private static UserSystem? instance = null;
 
-        //på skoldatorn
         string members_file = @"C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\Files\Members.txt";
         string librarians_file = @"C:\Users\emma.dahlqvist4\Desktop\Bibliotek\BiblioteksProgram\BiblioteksProgram\Files\Librarians.txt";
 
@@ -118,6 +117,7 @@ namespace BiblioteksProgram
             return null;
         }
 
+        //sök funktion
         public List<User> FindUsers(string search)
         {
             List<User> results = new List<User>();

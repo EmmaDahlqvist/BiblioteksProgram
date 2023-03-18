@@ -57,19 +57,6 @@ namespace BiblioteksProgram
             return takenIds;
         }
 
-        //få rätt upplaga
-        public Book GetBook(Book book)
-        {
-            foreach(Book a_book in available_books)
-            {
-                if(a_book.title == book.title && a_book.ISBN == book.ISBN && book.author == a_book.author)
-                {
-                    return a_book;
-                }
-            }
-            return null;
-        }
-
         public Book GetBookFromID(int id)
         {
             foreach(Book book in available_books)
@@ -82,6 +69,57 @@ namespace BiblioteksProgram
             return null;
         }
 
+        //Bokens titel och författare stämmer överens med en annan bok
+        public bool BooksWithSameTitle(Book book)
+        {
+            foreach (Book a_books in available_books)
+            {
+                if (a_books.title == book.title && a_books.author == book.author)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public string WrongISBN(Book book)
+        {
+            string correctISBN = null;
+            foreach(Book a_books in available_books)
+            {
+                if(a_books.title == book.title && a_books.author == book.author && book.id != a_books.id)
+                {
+                    if(a_books.ISBN == book.ISBN)
+                    {
+                        //STÄMMER
+                        return correctISBN; // returnera som null
+                    } else
+                    {
+                        //STÄMMER INTE => returnera det korrekta
+                        return a_books.ISBN;
+                    }
+                }
+            }
+
+            //Boken fanns inte ens med
+            return correctISBN;
+        }
+
+        //bör kombineras med booktitleexists och wrongisbn
+        public bool ISBNIsTaken(Book book)
+        {
+            foreach(Book a_books in available_books)
+            {
+                if(a_books.ISBN == book.ISBN && a_books.id != book.id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        //Sök funktion
         public List<Book> FindBooks(string search)
         {
             int maxDistance = 2;
@@ -91,7 +129,8 @@ namespace BiblioteksProgram
                 int titleDistance = levenshteinDistance.GetDistance(book.title, search);
                 int authorDistance = levenshteinDistance.GetDistance(book.author, search) ;
                 int ISBNDistance = levenshteinDistance.GetDistance(book.ISBN, search);
-                if(titleDistance <= maxDistance || authorDistance <= maxDistance || ISBNDistance <= maxDistance)
+                int genreDistance = levenshteinDistance.GetDistance(book.genre, search) ;
+                if(titleDistance <= maxDistance || authorDistance <= maxDistance || ISBNDistance <= maxDistance || genreDistance <= maxDistance)
                 {
                     results.Add(book);
                 }
@@ -102,7 +141,7 @@ namespace BiblioteksProgram
 
         private void Save()
         {
-            string[] aBooksStrArray = available_books.Select(book => $"{book.id}|{book.title}|{book.author}|{book.ISBN}|{book.isBorrowed}|{book.isRented}|{book.owner}").ToArray();
+            string[] aBooksStrArray = available_books.Select(book => $"{book.id}|{book.title}|{book.author}|{book.ISBN}|{book.genre}|{book.isBorrowed}|{book.isRented}|{book.owner}").ToArray();
 
             File.WriteAllLines(available_file, aBooksStrArray);
         }
@@ -124,11 +163,12 @@ namespace BiblioteksProgram
                     string title = itemSplit[1];
                     string author = itemSplit[2];
                     string ISBN = itemSplit[3];
-                    bool isBorrowed = bool.Parse(itemSplit[4]);
-                    bool isRented = bool.Parse(itemSplit[5]);
-                    string owner = itemSplit[6];
+                    string genre = itemSplit[4];
+                    bool isBorrowed = bool.Parse(itemSplit[5]);
+                    bool isRented = bool.Parse(itemSplit[6]);
+                    string owner = itemSplit[7];
 
-                    Book book = new Book(id, title, author, ISBN, isBorrowed, isRented, owner);
+                    Book book = new Book(id, title, author, ISBN, genre, isBorrowed, isRented, owner);
                     list.Add(book);
                 }
             }

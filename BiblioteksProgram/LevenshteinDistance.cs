@@ -8,8 +8,10 @@ namespace BiblioteksProgram
 {
     internal class LevenshteinDistance
     {
-        public int GetDistance(string s, string t)
+        public int GetDistance(string s1, string t1)
         {
+            string s = s1.ToLower();
+            string t = t1.ToLower();
             // Special cases
             if (s == t) return 0;
             if (s.Length == 0) return t.Length;
